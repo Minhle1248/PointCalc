@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Máy tính điểm THPT - Loại 1</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  /* Soft, colorful animated background */
+  background: linear-gradient(-45deg, #a1c4fd, #c2e9fb, #ffecd2, #fcb69f);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  color: #1a1a1a;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow-x: hidden;
+}
+
+.wrap { width: 100%; max-width: 640px; }
+
+h1 {
+  font-size: 19px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 0 2px 10px rgba(255,255,255,0.5);
+}
+
+.circle-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  /* Add a subtle glass backdrop behind the circle so it stands out */
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.05);
+}
+
+svg#ring { overflow: visible; }
+.ring-bg { stroke: rgba(0,0,0,0.06); }
+
+.score-label {
+  font-size: 13px;
+  color: #555;
+  margin-top: 1rem;
+  letter-spacing: .04em;
+  transition: color 0.3s;
+  font-weight: 500;
+}
+
+.sections { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+
+/* Glassmorphism Cards */
+.card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12); }
+
+.card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.part-score { font-weight: 600; color: #333; background: rgba(255,255,255,0.6); padding: 4px 8px; border-radius: 6px;}
+
+.row { display: flex; align-items: center; gap: 10px; margin-bottom: .5rem; }
+.row label { font-size: 14px; color: #444; flex: 1; min-width: 0; font-weight: 500;}
+
+.row input[type=number] {
+  width: 64px; text-align: center; font-size: 14px; padding: 6px 8px;
+  border: 1px solid rgba(0,0,0,0.1); border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9); color: #1a1a1a; outline: none; transition: all 0.2s;
+}
+.row input[type=number]:focus { border-color: #1d9e75; box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.2); }
+.pts { font-size: 13px; color: #777; min-width: 56px; text-align: right; }
+
+.ds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+
+.ds-card {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 10px; padding: .6rem .75rem; transition: background 0.2s;
+}
+.ds-card:hover { background: rgba(255, 255, 255, 0.8); }
+
+.ds-card .label { font-size: 12px; font-weight: 500; color: #666; margin-bottom: .4rem; }
+.ys-row { display: flex; gap: 6px; align-items: center; }
+.ys-row span { font-size: 11px; font-weight: 500; color: #888; width: 16px; text-align: center; }
+.ys-row input[type=checkbox] { width: 18px; height: 18px; accent-color: #1d9e75; cursor: pointer; transition: transform 0.1s; }
+.ys-row input[type=checkbox]:active { transform: scale(0.85); }
+.ys-pts { font-size: 12px; font-weight: 500; color: #666; margin-top: .35rem; text-align: right; }
+
+.total-bar {
+  margin-top: 1.5rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+}
+.total-bar:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12); }
+
+.total-bar .lbl { font-size: 15px; font-weight: 600; color: #555; }
+.total-bar .val { font-size: 24px; font-weight: 600; color: #1a1a1a; transition: color 0.3s; }
+
+/* Colorful gradient button */
+.reset-btn {
+  display: block; margin: 1.5rem auto 0; padding: 10px 32px; font-size: 14px; font-weight: 500;
+  color: #fff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none; border-radius: 12px; cursor: pointer; font-family: inherit; transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+}
+.reset-btn:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4); transform: translateY(-2px); }
+.reset-btn:active { transform: scale(0.95); }
+
+.confetti { position: fixed; z-index: 9999; pointer-events: none; }
+
+/* Vibrant Dark Mode */
+@media(prefers-color-scheme: dark) {
+  body {
+    background: linear-gradient(-45deg, #1f1c2c, #3a2b4b, #2c3e50, #000000);
+    background-size: 400% 400%;
+    color: #e8e8e4;
+  }
+  h1 { color: #fff; text-shadow: 0 2px 15px rgba(0,0,0,0.8); }
+  
+  .circle-wrap {
+    background: rgba(20, 20, 20, 0.4);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .ring-bg { stroke: rgba(255,255,255,0.05); }
+  .score-label { color: #aaa; }
+  
+  .card, .total-bar {
+    background: rgba(30, 30, 30, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  .card-title, .total-bar .lbl { color: #aaa; }
+  .part-score { color: #e8e8e4; background: rgba(0,0,0,0.3); }
+  .row label { color: #ccc; }
+  
+  .row input[type=number], .ds-card {
+    background: rgba(0, 0, 0, 0.4);
+    color: #e8e8e4;
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  .ds-card:hover { background: rgba(0, 0, 0, 0.6); }
+  .ds-card .label { color: #aaa; }
+  .ys-pts { color: #aaa; }
+  
+  #score-text { fill: #e8e8e4; }
+  .score-sub { fill: #888; }
+  .total-bar .val { color: #e8e8e4; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Máy tính điểm THPT- Loại 1</h1>
+
+  <div class="circle-wrap">
+    <svg id="ring" width="180" height="180" viewBox="0 0 180 180">
+      <circle cx="90" cy="90" r="72" fill="none" stroke-width="14" class="ring-bg"/>
+      <circle id="arc" cx="90" cy="90" r="72" fill="none" stroke="#1d9e75" stroke-width="14"
+        stroke-linecap="round" stroke-dasharray="452.39" stroke-dashoffset="452.39"
+        transform="rotate(-90 90 90)" style="transition:stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.4s"/>
+      <text id="score-text" x="90" y="86" text-anchor="middle" font-size="36" font-weight="600" fill="#1a1a1a" style="transition: fill 0.4s;">0.00</text>
+      <text class="score-sub" x="90" y="108" text-anchor="middle" font-size="13" fill="#888">/ 10</text>
+    </svg>
+    <div class="score-label" id="grade-label">Nhập kết quả bên dưới</div>
+  </div>
+
+  <div class="sections">
+    <div class="card">
+      <div class="card-title">
+        Phần I — Trắc nghiệm nhiều phương án
+        <span class="part-score" id="p1s">0.00đ / 3đ</span>
+      </div>
+      <div class="row">
+        <label>Số câu đúng</label>
+        <input type="number" id="p1" min="0" max="12" value="0">
+        <span class="pts">/ 12 câu</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Phần II — Đúng / Sai (4 câu × 4 ý)
+        <span class="part-score" id="p2s">0.00đ / 4đ</span>
+      </div>
+      <div class="ds-grid" id="ds-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        Phần III — Trả lời ngắn
+        <span class="part-score" id="p3s">0.00đ / 3đ</span>
+      </div>
+      <div class="row">
+        <label>Số câu đúng</label>
+        <input type="number" id="p3" min="0" max="6" value="0">
+        <span class="pts">/ 6 câu</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="total-bar">
+    <span class="lbl">Tổng điểm</span>
+    <span class="val" id="total-val">0.00 / 10</span>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">Đặt lại hệ thống</button>
+</div>
+
+<script>
+const dsState=[[false,false,false,false],[false,false,false,false],[false,false,false,false],[false,false,false,false]];
+let currentScore = 0;
+let confettiFired = false;
+let scoreAnimationTimer = null;
+
+function dsScore(arr){
+  const c=arr.filter(Boolean).length;
+  return c===0?0:c===1?0.1:c===2?0.25:c===3?0.5:1.0;
+}
+
+function buildDS(){
+  const g=document.getElementById('ds-grid');
+  g.innerHTML='';
+  for(let q=0;q<4;q++){
+    const d=document.createElement('div');
+    d.className='ds-card';
+    const lbl=document.createElement('div');
+    lbl.className='label';lbl.textContent='Câu '+(q+1);
+    d.appendChild(lbl);
+    const row=document.createElement('div');
+    row.className='ys-row';
+    ['a','b','c','d'].forEach((x,i)=>{
+      const s=document.createElement('span');s.textContent=x;
+      const cb=document.createElement('input');cb.type='checkbox';
+      cb.checked=dsState[q][i];
+      cb.addEventListener('change',()=>{dsState[q][i]=cb.checked;update();});
+      row.appendChild(s);row.appendChild(cb);
+    });
+    const pts=document.createElement('div');
+    pts.className='ys-pts';pts.id='ds-pts-'+q;pts.textContent='0.00đ';
+    d.appendChild(row);d.appendChild(pts);
+    g.appendChild(d);
+  }
+}
+
+const CIRC=2*Math.PI*72;
+const arc=document.getElementById('arc');
+const scoreText=document.getElementById('score-text');
+const gradeLabel=document.getElementById('grade-label');
+const totalVal=document.getElementById('total-val');
+
+const colors=['#e24b4a','#e24b4a','#e24b4a','#e24b4a','#e24b4a','#ba7517','#ba7517','#1d9e75','#1d9e75','#1d9e75','#1d9e75'];
+const labels=['💀','Đại Học Family Mart','Đại Học Bách Hóa Xanh','Cao Đăng Y tế Bạc Liêu','Đại Học Bạc Liêu','Đại Học Bạc Liêu','Đại Học Cần Thơ','Hu tết','Hu tết','UEH','BKU'];
+
+function fireConfetti() {
+  const customColors = ['#1d9e75', '#ba7517', '#3498db', '#9b59b6', '#f1c40f', '#e74c3c'];
+  for(let i=0; i<80; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.top = '-20px';
+    el.style.width = Math.random() * 8 + 6 + 'px';
+    el.style.height = Math.random() * 12 + 8 + 'px';
+    el.style.backgroundColor = customColors[Math.floor(Math.random() * customColors.length)];
+    el.style.transform = `rotate(${Math.random() * 360}deg)`;
+    
+    const duration = Math.random() * 2 + 2;
+    el.style.transition = `top ${duration}s cubic-bezier(0.37, 0, 0.63, 1), transform ${duration}s linear, opacity ${duration}s ease-in`;
+    document.body.appendChild(el);
+
+    setTimeout(() => {
+      el.style.top = '100vh';
+      el.style.transform = `rotate(${Math.random() * 720}deg)`;
+      el.style.opacity = '0';
+    }, 50);
+
+    setTimeout(() => el.remove(), duration * 1000 + 100);
+  }
+}
+
+function update(){
+  const p1v=Math.min(12,Math.max(0,parseInt(document.getElementById('p1').value)||0));
+  const p3v=Math.min(6,Math.max(0,parseInt(document.getElementById('p3').value)||0));
+
+  const p1Score=parseFloat((p1v*0.25).toFixed(2));
+  let p2Score=0;
+  for(let q=0;q<4;q++){
+    const s=dsScore(dsState[q]);
+    p2Score+=s;
+    document.getElementById('ds-pts-'+q).textContent=s.toFixed(2)+'đ';
+  }
+  p2Score=parseFloat(p2Score.toFixed(2));
+  const p3Score=parseFloat((p3v*0.5).toFixed(2));
+
+  document.getElementById('p1s').textContent=p1Score.toFixed(2)+'đ / 3đ';
+  document.getElementById('p2s').textContent=p2Score.toFixed(2)+'đ / 4đ';
+  document.getElementById('p3s').textContent=p3Score.toFixed(2)+'đ / 3đ';
+
+  const total=parseFloat((p1Score+p2Score+p3Score).toFixed(2));
+  const pct=Math.min(1,total/10);
+  
+  arc.style.strokeDashoffset=(CIRC*(1-pct)).toFixed(2);
+  const ci=Math.min(10,Math.floor(total));
+  
+  // Prevent zero state from taking the red color
+  const finalColor = total === 0 ? '#1d9e75' : (colors[ci]||'#1d9e75');
+  
+  arc.style.stroke = finalColor;
+  
+  // Don't colorize text if total is 0 to keep it looking clean initially
+  scoreText.style.fill = total === 0 ? '' : finalColor;
+  totalVal.style.color = total === 0 ? '' : finalColor;
+
+  gradeLabel.textContent=total===0?'Nhập kết quả bên dưới':(labels[ci]||'Xuất sắc');
+  gradeLabel.style.color = total === 0 ? '' : finalColor;
+  
+  totalVal.textContent=total.toFixed(2)+' / 10';
+
+  clearInterval(scoreAnimationTimer);
+  const start = currentScore;
+  const diff = total - start;
+  const steps = 15;
+  let step = 0;
+  
+  scoreAnimationTimer = setInterval(() => {
+    step++;
+    scoreText.textContent = (start + (diff * step / steps)).toFixed(2);
+    if(step >= steps) {
+      clearInterval(scoreAnimationTimer);
+      scoreText.textContent = total.toFixed(2);
+      currentScore = total;
+    }
+  }, 20);
+
+  if (total === 10 && !confettiFired) {
+    fireConfetti();
+    confettiFired = true;
+  } else if (total < 10) {
+    confettiFired = false;
+  }
+}
+
+function resetAll(){
+  document.getElementById('p1').value=0;
+  document.getElementById('p3').value=0;
+  for(let q=0;q<4;q++) dsState[q]=[false,false,false,false];
+  buildDS();
+  update();
+}
+
+buildDS();
+document.getElementById('p1').addEventListener('input',update);
+document.getElementById('p3').addEventListener('input',update);
+</script>
+</body>
+</html>
